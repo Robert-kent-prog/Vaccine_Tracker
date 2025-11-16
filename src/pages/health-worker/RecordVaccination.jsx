@@ -54,10 +54,7 @@ const RecordVaccination = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <DashboardHeader 
-        title="Record Vaccination" 
-        subtitle="Search for children and record vaccinations given"
-      />
+ 
 
       <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">

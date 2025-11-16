@@ -79,10 +79,7 @@ const FieldReports = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <DashboardHeader 
-        title="Field Reports" 
-        subtitle="Document your daily field activities and achievements"
-      />
+
 
       <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
