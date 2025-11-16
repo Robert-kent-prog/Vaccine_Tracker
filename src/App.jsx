@@ -26,6 +26,9 @@ import FacilityManagement from './pages/hospital/FacilityManagement'
 import VaccineStock from './pages/hospital/VaccineStock'
 import CoverageReports from './pages/hospital/CoverageReports'
 import AdminDashboard from './pages/admin/AdminDashboard'
+import Settings from './pages/admin/Settings'
+import UserManagement from './pages/admin/UserManagement'
+import SystemAnalytics from './pages/admin/SystemAnalytics'
 import './styles/globals.css'
 
 function App() {
@@ -161,12 +164,40 @@ function App() {
                     </HospitalLayout>
                   </AuthGuard>
                 } />
-                
+
                 {/* Admin Routes */}
                 <Route path="/admin" element={
                   <AuthGuard requiredRole="admin">
                     <AdminLayout>
                       <AdminDashboard />
+                    </AdminLayout>
+                  </AuthGuard>
+                } />
+                <Route path="/admin/user-management" element={
+                  <AuthGuard requiredRole="admin">
+                    <AdminLayout>
+                      <UserManagement />
+                    </AdminLayout>
+                  </AuthGuard>
+                } />
+                <Route path="/admin/system-analytics" element={
+                  <AuthGuard requiredRole="admin">
+                    <AdminLayout>
+                      <SystemAnalytics />
+                    </AdminLayout>
+                  </AuthGuard>
+                } />
+                <Route path="/admin/settings" element={
+                  <AuthGuard requiredRole="admin">
+                    <AdminLayout>
+                      <Settings />
+                    </AdminLayout>
+                  </AuthGuard>
+                } />
+                  <Route path="/admin/profile" element={
+                  <AuthGuard requiredRole="admin">
+                    <AdminLayout>
+                      <Profile />
                     </AdminLayout>
                   </AuthGuard>
                 } />

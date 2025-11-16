@@ -60,6 +60,7 @@ const Sidebar = () => {
         { name: 'CHW Management', href: '/admin/chw-management', icon: Stethoscope },
         { name: 'System Analytics', href: '/admin/system-analytics', icon: BarChart3 },
         { name: 'System Settings', href: '/admin/settings', icon: Settings },
+        { name: 'Profile', href: '/admin/profile', icon: Users },
       ]
     };
 

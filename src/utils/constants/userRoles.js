@@ -102,3 +102,24 @@ export const ROLE_DESCRIPTIONS = {
   hospital: 'Hospital staff can manage vaccine stock and view coverage reports',
   admin: 'Administrators have full system access and can manage all users'
 };
+
+export const COUNTIES = [
+  'Baringo', 'Bomet', 'Bungoma', 'Busia', 'Elgeyo-Marakwet', 'Embu', 'Garissa',
+  'Homa Bay', 'Isiolo', 'Kajiado', 'Kakamega', 'Kericho', 'Kiambu', 'Kilifi',
+  'Kirinyaga', 'Kisii', 'Kisumu', 'Kitui', 'Kwale', 'Laikipia', 'Lamu', 'Machakos',
+  'Makueni', 'Mandera', 'Marsabit', 'Meru', 'Migori', 'Mombasa', 'Murang\'a',
+  'Nairobi', 'Nakuru', 'Nandi', 'Narok', 'Nyamira', 'Nyandarua', 'Nyeri', 'Samburu',
+  'Siaya', 'Taita-Taveta', 'Tana River', 'Tharaka-Nithi', 'Trans Nzoia', 'Turkana',
+  'Uasin Gishu', 'Vihiga', 'Wajir', 'West Pokot'
+];
+
+// You can also add more location-related constants if needed
+export const SUB_COUNTIES = {
+  'Nairobi': ['Westlands', 'Dagoretti', 'Langata', 'Kibra', 'Roysambu', 'Kasarani', 'Ruaraka', 'Embakasi', 'Kamukunji', 'Starehe', 'Mathare'],
+  'Mombasa': ['Changamwe', 'Jomvu', 'Kisauni', 'Likoni', 'Mvita', 'Nyali'],
+  // Add more counties and their sub-counties as needed
+};
+
+export const WARDS = {
+  // Define wards for each sub-county if needed
+};
