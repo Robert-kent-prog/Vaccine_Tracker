@@ -15,8 +15,11 @@ import MotherDashboard from './pages/mother/MotherDashboard'
 import ChildProfile from './pages/mother/ChildProfile'
 import MotherVaccinationSchedule from './pages/mother/VaccinationSchedule'
 import MotherReminders from './pages/mother/Reminders'
-import MotherProfile from './pages/shared/Profile'
+import Profile from './pages/shared/Profile'
 import CHWDashboard from './pages/health-worker/CHWDashboard'
+import AssignedMothers from './pages/health-worker/AssignedMothers'
+import DefaultersList from './pages/health-worker/DefaultersList'
+import FieldReports from './pages/health-worker/FieldReports' 
 import RecordVaccination from './pages/health-worker/RecordVaccination'
 import HospitalDashboard from './pages/hospital/HospitalDashboard'
 import AdminDashboard from './pages/admin/AdminDashboard'
@@ -68,7 +71,7 @@ function App() {
                 <Route path="/mother/profile" element={
                   <AuthGuard requiredRole="mother">
                     <MotherLayout>
-                      <MotherProfile />
+                      <Profile />
                     </MotherLayout>
                   </AuthGuard>
                 } />
@@ -87,7 +90,27 @@ function App() {
                     </CHWLayout>
                   </AuthGuard>
                 } />
-                
+               <Route path="/health-worker/assigned-mothers" element={
+                  <AuthGuard requiredRole="health-worker">
+                    <CHWLayout>
+                      <AssignedMothers />
+                    </CHWLayout>
+                  </AuthGuard>
+                } />
+                <Route path="/health-worker/defaulters-list" element={
+                  <AuthGuard requiredRole="health-worker">
+                    <CHWLayout>
+                      <DefaultersList />
+                    </CHWLayout>
+                  </AuthGuard>
+                } />
+                <Route path="/health-worker/field-reports" element={
+                  <AuthGuard requiredRole="health-worker">
+                    <CHWLayout>
+                      <FieldReports />
+                    </CHWLayout>
+                  </AuthGuard>
+                } /> 
                 {/* Hospital Routes */}
                 <Route path="/hospital" element={
                   <AuthGuard requiredRole="hospital">
