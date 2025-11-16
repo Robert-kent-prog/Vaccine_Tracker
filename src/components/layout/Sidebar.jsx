@@ -32,7 +32,7 @@ const Sidebar = () => {
         { name: 'My Children', href: '/mother/child/:childId', icon: Users },
         { name: 'Vaccination Schedule', href: '/mother/vaccination-schedule', icon: Calendar },
         { name: 'Reminders', href: '/mother/reminders', icon: Bell },
-         { name: 'Mother`s Profile ', href: '/mother/profile', icon: Users },
+         { name: 'Profile ', href: '/mother/profile', icon: Users },
         // { name: 'Health Records', href: '/mother/health-records', icon: FileText },
       ],
       'health-worker': [
@@ -42,7 +42,7 @@ const Sidebar = () => {
         { name: 'Defaulters List', href: '/health-worker/defaulters-list', icon: FileText },
         { name: 'Field Reports', href: '/health-worker/field-reports', icon: BarChart3 },
         { name: 'My Schedule', href: '/health-worker/schedule', icon: Calendar },
-        { name: 'CHW Profile ', href: '/health-worker/profile', icon: Users },
+        { name: 'Profile ', href: '/health-worker/profile', icon: Users },
       ],
       hospital: [
         { name: 'Dashboard', href: '/hospital', icon: Home },
@@ -51,6 +51,7 @@ const Sidebar = () => {
         { name: 'Appointments', href: '/hospital/appointments', icon: Calendar },
         { name: 'Coverage Reports', href: '/hospital/coverage-reports', icon: BarChart3 },
         { name: 'Facility Management', href: '/hospital/facility-management', icon: Settings },
+        { name: 'Profile', href: '/hospital/profile', icon: Users },
       ],
       admin: [
         { name: 'Dashboard', href: '/admin', icon: Home },
