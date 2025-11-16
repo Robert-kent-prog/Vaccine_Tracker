@@ -43,10 +43,6 @@ const Settings = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <DashboardHeader 
-        title="System Settings" 
-        subtitle="Configure system-wide settings and preferences"
-      />
 
       <div className="max-w-4xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
