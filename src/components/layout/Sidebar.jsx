@@ -42,6 +42,7 @@ const Sidebar = () => {
         { name: 'Defaulters List', href: '/health-worker/defaulters-list', icon: FileText },
         { name: 'Field Reports', href: '/health-worker/field-reports', icon: BarChart3 },
         { name: 'My Schedule', href: '/health-worker/schedule', icon: Calendar },
+        { name: 'CHW Profile ', href: '/health-worker/profile', icon: Users },
       ],
       hospital: [
         { name: 'Dashboard', href: '/hospital', icon: Home },

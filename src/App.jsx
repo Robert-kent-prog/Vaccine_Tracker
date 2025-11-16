@@ -111,6 +111,13 @@ function App() {
                     </CHWLayout>
                   </AuthGuard>
                 } /> 
+                 <Route path="/health-worker/profile" element={
+                  <AuthGuard requiredRole="health-worker">
+                    <CHWLayout>
+                      <Profile />
+                    </CHWLayout>
+                  </AuthGuard>
+                } />
                 {/* Hospital Routes */}
                 <Route path="/hospital" element={
                   <AuthGuard requiredRole="hospital">
