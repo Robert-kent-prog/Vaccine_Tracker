@@ -32,8 +32,8 @@ const Sidebar = () => {
         { name: 'My Children', href: '/mother/child/:childId', icon: Users },
         { name: 'Vaccination Schedule', href: '/mother/vaccination-schedule', icon: Calendar },
         { name: 'Reminders', href: '/mother/reminders', icon: Bell },
-         { name: 'Profile ', href: '/mother/profile', icon: Users },
-        // { name: 'Health Records', href: '/mother/health-records', icon: FileText },
+        { name: 'Health Records', href: '/mother/health-records', icon: FileText },
+        { name: 'Profile ', href: '/mother/profile', icon: Users },
       ],
       'health-worker': [
         { name: 'Dashboard', href: '/health-worker', icon: Home },

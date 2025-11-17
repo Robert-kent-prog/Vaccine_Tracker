@@ -29,6 +29,7 @@ import AdminDashboard from './pages/admin/AdminDashboard'
 import Settings from './pages/admin/Settings'
 import UserManagement from './pages/admin/UserManagement'
 import SystemAnalytics from './pages/admin/SystemAnalytics'
+import HealthRecords from './pages/mother/HealthRecords'
 import './styles/globals.css'
 
 function App() {
@@ -78,6 +79,13 @@ function App() {
                   <AuthGuard requiredRole="mother">
                     <MotherLayout>
                       <Profile />
+                    </MotherLayout>
+                  </AuthGuard>
+                } />
+                <Route path="/mother/health-records" element={
+                  <AuthGuard requiredRole="mother">
+                    <MotherLayout>
+                      <HealthRecords />
                     </MotherLayout>
                   </AuthGuard>
                 } />
