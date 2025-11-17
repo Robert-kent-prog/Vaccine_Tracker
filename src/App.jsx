@@ -31,6 +31,10 @@ import UserManagement from './pages/admin/UserManagement'
 import SystemAnalytics from './pages/admin/SystemAnalytics'
 import HealthRecords from './pages/mother/HealthRecords'
 import MySchedule from './pages/health-worker/MySchedule'
+import Appointments from './pages/hospital/Appointments'
+import PatientRecords from './pages/hospital/PatientRecords'
+import CHWManagement from './pages/admin/CHWManagement'
+import HospitalManagement from './pages/admin/HospitalManagement'
 import './styles/globals.css'
 
 function App() {
@@ -174,6 +178,20 @@ function App() {
                     </HospitalLayout>
                   </AuthGuard>
                 } />
+                <Route path="/hospital/appointments" element={
+                  <AuthGuard requiredRole="hospital">
+                    <HospitalLayout>
+                      <Appointments />
+                    </HospitalLayout>
+                  </AuthGuard>
+                } />
+                <Route path="/hospital/patients" element={
+                  <AuthGuard requiredRole="hospital">
+                    <HospitalLayout>
+                      <PatientRecords />
+                    </HospitalLayout>
+                  </AuthGuard>
+                } />
                 <Route path="/health-worker/schedule" element={
                   <AuthGuard requiredRole="health-worker">
                     <CHWLayout>
@@ -214,6 +232,20 @@ function App() {
                   <AuthGuard requiredRole="admin">
                     <AdminLayout>
                       <Profile />
+                    </AdminLayout>
+                  </AuthGuard>
+                } />
+                <Route path="/admin/chw-management" element={
+                  <AuthGuard requiredRole="admin">
+                    <AdminLayout>
+                      <CHWManagement />
+                    </AdminLayout>
+                  </AuthGuard>
+                } />
+                <Route path="/admin/hospital-management" element={
+                  <AuthGuard requiredRole="admin">
+                    <AdminLayout>
+                      <HospitalManagement />
                     </AdminLayout>
                   </AuthGuard>
                 } />
