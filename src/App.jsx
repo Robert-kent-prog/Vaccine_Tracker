@@ -30,6 +30,7 @@ import Settings from './pages/admin/Settings'
 import UserManagement from './pages/admin/UserManagement'
 import SystemAnalytics from './pages/admin/SystemAnalytics'
 import HealthRecords from './pages/mother/HealthRecords'
+import MySchedule from './pages/health-worker/MySchedule'
 import './styles/globals.css'
 
 function App() {
@@ -132,6 +133,7 @@ function App() {
                     </CHWLayout>
                   </AuthGuard>
                 } />
+
                 {/* Hospital Routes */}
                 <Route path="/hospital" element={
                   <AuthGuard requiredRole="hospital">
@@ -172,7 +174,13 @@ function App() {
                     </HospitalLayout>
                   </AuthGuard>
                 } />
-
+                <Route path="/health-worker/schedule" element={
+                  <AuthGuard requiredRole="health-worker">
+                    <CHWLayout>
+                      <MySchedule />
+                    </CHWLayout>
+                  </AuthGuard>
+                } />
                 {/* Admin Routes */}
                 <Route path="/admin" element={
                   <AuthGuard requiredRole="admin">
