@@ -1,13 +1,13 @@
-// src/contexts/AuthContext.jsx
-import React, { createContext, useState, useContext, useEffect } from 'react';
+/* eslint-disable react-refresh/only-export-components */
+import React, { createContext, useState, useContext, useEffect } from "react";
+import { authAPI } from "../services/api/auth";
 
-// Create and export AuthContext
 export const AuthContext = createContext();
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };
@@ -15,104 +15,125 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [users, setUsers] = useState([]); // Store registered users
+  const [error, setError] = useState(null);
 
+  // Initialize auth from localStorage
   useEffect(() => {
-    // Check for stored auth data and registered users
-    const storedUser = localStorage.getItem('vaccination_user');
-    const storedUsers = localStorage.getItem('vaccination_users');
-    
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-    if (storedUsers) {
-      setUsers(JSON.parse(storedUsers));
-    }
-    setLoading(false);
+    const initializeAuth = async () => {
+      try {
+        // Check if user is stored
+        const storedUser = authAPI.getStoredUser();
+        const isAuthenticated = authAPI.isAuthenticated();
+
+        if (isAuthenticated && storedUser) {
+          setUser(storedUser);
+          // Verify token with backend
+          await authAPI.getCurrentUser();
+        }
+      } catch (err) {
+        // Log and clear invalid token/storage
+        console.error(err);
+        authAPI.logout();
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    initializeAuth();
   }, []);
 
-  const login = async (userData) => {
-    setUser(userData);
-    localStorage.setItem('vaccination_user', JSON.stringify(userData));
+  const login = async (credentials) => {
+    setError(null);
+    const response = await authAPI.login(credentials);
+
+    if (response.success) {
+      const { user } = response.data;
+      setUser(user);
+      return { success: true, user };
+    } else {
+      throw new Error(response.message || "Login failed");
+    }
   };
 
   const signup = async (userData) => {
-    // Check if username already exists
-    const existingUser = users.find(u => u.username === userData.username);
-    if (existingUser) {
-      throw new Error('Username already exists');
-    }
+    setError(null);
 
-    // Check if email already exists
-    const existingEmail = users.find(u => u.email === userData.email);
-    if (existingEmail) {
-      throw new Error('Email already registered');
-    }
-
-    // Create new user object
-    const newUser = {
-      id: Date.now().toString(), // Simple ID generation
-      ...userData,
-      createdAt: new Date().toISOString(),
-      isActive: true
+    // Transform frontend role to backend role
+    const roleMapping = {
+      mother: "mother",
+      "health-worker": "health_worker",
+      hospital: "hospital_staff",
+      admin: "admin",
     };
 
-    // Add to users array and update storage
-    const updatedUsers = [...users, newUser];
-    setUsers(updatedUsers);
-    localStorage.setItem('vaccination_users', JSON.stringify(updatedUsers));
+    const backendData = {
+      name: userData.name,
+      username: userData.username,
+      email: userData.email,
+      password: userData.password,
+      role: roleMapping[userData.role] || "mother",
+      phone: userData.phone || "",
+      subCounty: userData.subCounty || "",
+      ward: userData.ward || "",
+      location: userData.location || "",
+      children: userData.children || [],
+    };
 
-    // Auto-login after signup
-    const { confirmPassword, children, ...loginData } = newUser;
-    await login(loginData);
+    const response = await authAPI.register(backendData);
 
-    return newUser;
+    if (response.success) {
+      const { user } = response.data;
+      setUser(user);
+      return { success: true, user };
+    } else {
+      throw new Error(response.message || "Registration failed");
+    }
   };
 
   const logout = () => {
+    authAPI.logout();
     setUser(null);
-    localStorage.removeItem('vaccination_user');
+    setError(null);
   };
 
-  const updateUser = (updatedData) => {
-    const updatedUser = { ...user, ...updatedData };
-    setUser(updatedUser);
-    localStorage.setItem('vaccination_user', JSON.stringify(updatedUser));
+  const updateProfile = async (userData) => {
+    if (!user) {
+      throw new Error("No user logged in");
+    }
 
-    // Also update in users array if needed
-    const updatedUsers = users.map(u => 
-      u.id === user.id ? { ...u, ...updatedData } : u
-    );
-    setUsers(updatedUsers);
-    localStorage.setItem('vaccination_users', JSON.stringify(updatedUsers));
+    const response = await authAPI.updateProfile(user._id, userData);
+
+    if (response.success) {
+      const updatedUser = { ...user, ...response.data };
+      setUser(updatedUser);
+      return { success: true, user: updatedUser };
+    } else {
+      throw new Error(response.message || "Update failed");
+    }
   };
 
-  // Helper function to validate credentials (for login)
-  const validateCredentials = (username, password) => {
-    const foundUser = users.find(u => 
-      u.username === username && u.password === password && u.isActive
-    );
-    return foundUser || null;
+  const changePassword = async (currentPassword, newPassword) => {
+    if (!user) {
+      throw new Error("No user logged in");
+    }
+
+    return await authAPI.changePassword(user._id, currentPassword, newPassword);
   };
 
   const value = {
     user,
-    users,
+    loading,
+    error,
     login,
     signup,
     logout,
-    updateUser,
-    validateCredentials,
-    loading,
-    isAuthenticated: !!user
+    updateProfile,
+    changePassword,
+    isAuthenticated: !!user,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
-// Export AuthContext as default for use in useAuth.js
 export default AuthContext;
