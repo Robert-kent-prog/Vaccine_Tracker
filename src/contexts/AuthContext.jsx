@@ -78,20 +78,20 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // In your AuthContext signup function
   const signup = async (userData) => {
     setError(null);
 
     console.log("🔍 AuthContext - Signup called with:", userData);
 
-    // Send data exactly as frontend provides (no transformation needed)
-    // The backend will handle role validation
+    // Note: userData.role is already converted to backend format by getBackendRole()
     const backendData = {
       name: userData.name,
       username: userData.username,
       email: userData.email,
       password: userData.password,
-      role: userData.role, // Send role exactly as selected
-      // Only include these fields if they exist (for mother role)
+      role: userData.role, // Already in backend format
+      // Only include these fields if they exist
       ...(userData.phone && { phone: userData.phone }),
       ...(userData.subCounty && { subCounty: userData.subCounty }),
       ...(userData.ward && { ward: userData.ward }),

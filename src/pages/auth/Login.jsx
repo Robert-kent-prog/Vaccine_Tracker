@@ -12,11 +12,12 @@ import {
   Syringe,
   AlertCircle,
 } from "lucide-react";
+import { getDashboardRoute, ROLES_CONFIG } from "../../utils/roleUtils";
 
 const Login = () => {
   const [selectedRole, setSelectedRole] = useState("");
   const [credentials, setCredentials] = useState({
-    identifier: "", // Changed from username to identifier (can be email or username)
+    identifier: "",
     password: "",
   });
   const [showPassword, setShowPassword] = useState(false);
@@ -25,93 +26,35 @@ const Login = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  const roles = [
-    {
-      id: "mother",
-      title: "Mother/Parent",
-      icon: Users,
-      description: "Track your child's vaccination schedule",
-      color: "bg-blue-500",
-    },
-    {
-      id: "health-worker",
-      title: "Community Health Worker",
-      icon: Stethoscope,
-      description: "Manage vaccinations and follow-ups",
-      color: "bg-green-500",
-    },
-    {
-      id: "hospital", // This matches your route path
-      title: "Hospital Staff",
-      icon: Building,
-      description: "Manage vaccine stock and coverage",
-      color: "bg-red-500",
-    },
-    {
-      id: "admin",
-      title: "System Administrator",
-      icon: Shield,
-      description: "System analytics and user management",
-      color: "bg-purple-500",
-    },
-  ];
+  const roles = Object.values(ROLES_CONFIG);
 
   const handleRoleSelect = (roleId) => {
     setSelectedRole(roleId);
     setCredentials({ identifier: "", password: "" });
     setErrors({});
   };
+
   const handleLogin = async (e) => {
     e.preventDefault();
     setErrors({});
     setIsLoading(true);
 
     try {
-      // Determine if identifier is email or username
       const isEmail = credentials.identifier.includes("@");
-
-      // Prepare login credentials
       const loginData = {
         [isEmail ? "email" : "username"]: credentials.identifier,
         password: credentials.password,
       };
 
-      // Call login function from AuthContext
       const result = await login(loginData);
 
       if (result.success) {
         const user = result.user;
-        const backendRole = user.role;
-
-        // Convert backend role to frontend route using the same logic as AuthGuard
-        const getDashboardRoute = (role) => {
-          const normalized = role.toLowerCase().trim();
-
-          if (normalized === "hospital_staff" || normalized === "hospital") {
-            return "/hospital";
-          }
-          if (
-            normalized === "health_worker" ||
-            normalized === "health-worker"
-          ) {
-            return "/health-worker";
-          }
-          if (normalized === "mother" || normalized === "mothers") {
-            return "/mother";
-          }
-          if (normalized === "admin") {
-            return "/admin";
-          }
-        };
-
-        const route = getDashboardRoute(backendRole);
-
-        // Navigate to the dashboard
+        const route = getDashboardRoute(user.role);
         navigate(route);
       }
     } catch (error) {
       console.error("❌ Login error:", error);
-      console.error("❌ Error message:", error.message);
 
       let errorMessage = "Login failed. Please check your credentials.";
 
@@ -135,7 +78,23 @@ const Login = () => {
   };
 
   const handleCreateAccount = () => {
-    navigate("/signup");
+    // Pass the selected role as URL parameter
+    if (selectedRole) {
+      navigate(`/signup?role=${selectedRole}`);
+    } else {
+      navigate("/signup");
+    }
+  };
+
+  // Get icon component from string
+  const getIconComponent = (iconName) => {
+    const icons = {
+      Users: Users,
+      Stethoscope: Stethoscope,
+      Building: Building,
+      Shield: Shield,
+    };
+    return icons[iconName] || Users;
   };
 
   return (
@@ -181,33 +140,36 @@ const Login = () => {
             )}
 
             <div className="space-y-4">
-              {roles.map((role) => (
-                <button
-                  key={role.id}
-                  onClick={() => handleRoleSelect(role.id)}
-                  className={`w-full p-6 rounded-xl border-2 transition-all duration-200 text-left ${
-                    selectedRole === role.id
-                      ? "border-blue-500 bg-blue-50 shadow-md transform scale-[1.02]"
-                      : "border-gray-200 hover:border-blue-300 hover:bg-gray-50"
-                  }`}
-                >
-                  <div className="flex items-center">
-                    <div
-                      className={`p-3 rounded-lg ${role.color} text-white mr-4 shadow-sm`}
-                    >
-                      <role.icon className="h-6 w-6" />
+              {roles.map((role) => {
+                const Icon = getIconComponent(role.icon);
+                return (
+                  <button
+                    key={role.id}
+                    onClick={() => handleRoleSelect(role.id)}
+                    className={`w-full p-6 rounded-xl border-2 transition-all duration-200 text-left ${
+                      selectedRole === role.id
+                        ? "border-blue-500 bg-blue-50 shadow-md transform scale-[1.02]"
+                        : "border-gray-200 hover:border-blue-300 hover:bg-gray-50"
+                    }`}
+                  >
+                    <div className="flex items-center">
+                      <div
+                        className={`p-3 rounded-lg ${role.color} text-white mr-4 shadow-sm`}
+                      >
+                        <Icon className="h-6 w-6" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-gray-800 text-lg">
+                          {role.title}
+                        </h3>
+                        <p className="text-gray-600 text-sm mt-1">
+                          {role.description}
+                        </p>
+                      </div>
                     </div>
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-gray-800 text-lg">
-                        {role.title}
-                      </h3>
-                      <p className="text-gray-600 text-sm mt-1">
-                        {role.description}
-                      </p>
-                    </div>
-                  </div>
-                </button>
-              ))}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
@@ -215,7 +177,9 @@ const Login = () => {
           <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8">
             <h2 className="text-2xl font-bold text-gray-800 mb-2">
               {selectedRole
-                ? `Login as ${roles.find((r) => r.id === selectedRole)?.title}`
+                ? `Login as ${
+                    ROLES_CONFIG[selectedRole]?.title || selectedRole
+                  }`
                 : "Select a Role"}
             </h2>
             <p className="text-gray-600 mb-6">
@@ -323,7 +287,10 @@ const Login = () => {
                         onClick={handleCreateAccount}
                         className="text-blue-600 hover:text-blue-700 font-medium underline transition-colors duration-200"
                       >
-                        Create New Account
+                        Create New Account as{" "}
+                        {selectedRole
+                          ? ROLES_CONFIG[selectedRole]?.title
+                          : "User"}
                       </button>
                     </p>
                   </div>

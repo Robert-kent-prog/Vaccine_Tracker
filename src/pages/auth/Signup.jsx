@@ -1,6 +1,6 @@
 // src/pages/SignUp.jsx
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import {
   Shield,
   Users,
@@ -15,12 +15,24 @@ import {
   Baby,
   ArrowLeft,
 } from "lucide-react";
-
 import { useAuth } from "../../hooks/useAuth";
+import {
+  getDashboardRoute,
+  getBackendRole,
+  ROLES_CONFIG,
+} from "../../utils/roleUtils";
 
 const SignUp = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  // Get role from URL parameters
+  const queryParams = new URLSearchParams(location.search);
+  const roleFromUrl = queryParams.get("role");
+
+  // Start at step 1 for ALL users (Account info)
   const [step, setStep] = useState(1);
-  const [selectedRole, setSelectedRole] = useState("");
+  const [selectedRole, setSelectedRole] = useState(roleFromUrl || "");
   const [formData, setFormData] = useState({
     name: "",
     username: "",
@@ -38,7 +50,6 @@ const SignUp = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState({});
   const { signup } = useAuth();
-  const navigate = useNavigate();
 
   const [childData, setChildData] = useState({
     name: "",
@@ -46,44 +57,19 @@ const SignUp = () => {
     gender: "male",
   });
 
-  const roles = [
-    {
-      id: "mother",
-      title: "Mother/Parent",
-      icon: Users,
-      description: "Track your child's vaccination schedule",
-      color: "bg-blue-500",
-      showChildren: true,
-      showDetails: true,
-    },
-    {
-      id: "health_worker",
-      title: "Community Health Worker",
-      icon: Stethoscope,
-      description: "Manage vaccinations and follow-ups",
-      color: "bg-green-500",
-      showChildren: false,
-      showDetails: false,
-    },
-    {
-      id: "hospital_staff",
-      title: "Hospital Staff",
-      icon: Building,
-      description: "Manage vaccine stock and coverage",
-      color: "bg-red-500",
-      showChildren: false,
-      showDetails: false,
-    },
-    {
-      id: "admin",
-      title: "System Administrator",
-      icon: Shield,
-      description: "System analytics and user management",
-      color: "bg-purple-500",
-      showChildren: false,
-      showDetails: false,
-    },
-  ];
+  // Get role configuration
+  const selectedRoleData = selectedRole ? ROLES_CONFIG[selectedRole] : null;
+
+  // Get icon component from string
+  const getIconComponent = (iconName) => {
+    const icons = {
+      Users: Users,
+      Stethoscope: Stethoscope,
+      Building: Building,
+      Shield: Shield,
+    };
+    return icons[iconName] || Users;
+  };
 
   const kituiSubCounties = [
     "Kitui West",
@@ -127,7 +113,23 @@ const SignUp = () => {
     "Mwingi East": ["Kyuso", "Mumoni", "Tseikuru", "Tharaka", "Ngomeni"],
   };
 
-  const selectedRoleData = roles.find((role) => role.id === selectedRole);
+  // If role is provided in URL, set it but don't skip step 1
+  useEffect(() => {
+    if (roleFromUrl && ROLES_CONFIG[roleFromUrl]) {
+      setSelectedRole(roleFromUrl);
+    }
+  }, [roleFromUrl]);
+
+  // Update step labels to match your screenshots
+  const getStepLabel = (stepNum) => {
+    if (stepNum === 1) return "Account";
+    if (stepNum === 2) {
+      if (selectedRoleData?.showDetails) return "Details";
+      return "Review";
+    }
+    if (stepNum === 3) return "Children";
+    return "";
+  };
 
   const validateStep1 = () => {
     const newErrors = {};
@@ -188,7 +190,12 @@ const SignUp = () => {
   };
 
   const handleBack = () => {
-    if (step > 1) setStep(step - 1);
+    if (step > 1) {
+      setStep(step - 1);
+    } else {
+      // If at step 1 and going back, go to login
+      navigate("/");
+    }
   };
 
   const handleAddChild = () => {
@@ -222,7 +229,7 @@ const SignUp = () => {
         username: formData.username,
         email: formData.email,
         password: formData.password,
-        role: selectedRole,
+        role: getBackendRole(selectedRole), // Convert to backend role format
         children: formData.children || [],
       };
 
@@ -233,39 +240,13 @@ const SignUp = () => {
         signupData.ward = formData.ward;
         signupData.location = formData.location;
       }
-      // DO NOT add these fields for other roles at all
 
       // Call signup function from AuthContext
       const result = await signup(signupData);
 
       if (result.success) {
         const user = result.user;
-        const backendRole = user.role;
-
-        // Convert backend role to frontend route using the same logic as AuthGuard
-        const getDashboardRoute = (role) => {
-          const normalized = role.toLowerCase().trim();
-
-          if (normalized === "hospital_staff" || normalized === "hospital") {
-            return "/hospital";
-          }
-          if (
-            normalized === "health_worker" ||
-            normalized === "health-worker"
-          ) {
-            return "/health-worker";
-          }
-          if (normalized === "mother" || normalized === "mothers") {
-            return "/mother";
-          }
-          if (normalized === "admin") {
-            return "/admin";
-          }
-        };
-
-        const route = getDashboardRoute(backendRole);
-
-        // Navigate to the dashboard
+        const route = getDashboardRoute(user.role);
         navigate(route);
       }
     } catch (error) {
@@ -284,14 +265,8 @@ const SignUp = () => {
     return 2;
   };
 
-  const getStepLabel = (stepNum) => {
-    if (stepNum === 1) return "Account";
-    if (stepNum === 2)
-      return selectedRoleData?.showDetails ? "Details" : "Review";
-    if (stepNum === 3) return "Children";
-    return "";
-  };
-
+  // Determine if we should show role selection
+  // Only show role selection if no role is selected AND no role from URL
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 flex items-center justify-center p-4">
       <div className="max-w-2xl w-full bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
@@ -322,7 +297,9 @@ const SignUp = () => {
             Join Community Vaccination System
           </h1>
           <p className="text-blue-100">
-            Ensuring Complete & Timely Childhood Immunization
+            {selectedRoleData
+              ? `Registering as ${selectedRoleData.title}`
+              : "Ensuring Complete & Timely Childhood Immunization"}
           </p>
         </div>
 
@@ -371,202 +348,228 @@ const SignUp = () => {
             </div>
           )}
 
-          {/* Step 1: Account Information */}
+          {/* Step 1: ALWAYS show Account Information */}
           {step === 1 && (
             <div className="space-y-6">
-              {/* Role Selection */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-3">
-                  <Shield className="inline w-4 h-4 mr-2" />
-                  Select Your Role
-                </label>
-                <div className="space-y-3">
-                  {roles.map((role) => {
-                    const Icon = role.icon;
-                    return (
-                      <button
-                        key={role.id}
-                        onClick={() => setSelectedRole(role.id)}
-                        className={`w-full p-4 rounded-xl border-2 transition-all duration-200 text-left ${
-                          selectedRole === role.id
-                            ? "border-blue-500 bg-blue-50 shadow-md transform scale-[1.02]"
-                            : "border-gray-200 hover:border-blue-300 hover:bg-gray-50"
+              {/* Show selected role if it exists */}
+              {selectedRoleData ? (
+                <div className="p-4 bg-gray-50 rounded-lg mb-4">
+                  <div className="flex items-center">
+                    <div
+                      className={`p-3 rounded-lg ${selectedRoleData.color} text-white mr-4`}
+                    >
+                      {(() => {
+                        const Icon = getIconComponent(selectedRoleData.icon);
+                        return <Icon className="h-5 w-5" />;
+                      })()}
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-gray-800">
+                        Registering as {selectedRoleData.title}
+                      </h3>
+                      <p className="text-sm text-gray-600">
+                        {selectedRoleData.description}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                // Show role selection if no role is selected
+                <div className="mb-6">
+                  <label className="block text-sm font-medium text-gray-700 mb-3">
+                    <Shield className="inline w-4 h-4 mr-2" />
+                    Select Your Role
+                  </label>
+                  <div className="space-y-3">
+                    {Object.values(ROLES_CONFIG).map((role) => {
+                      const Icon = getIconComponent(role.icon);
+                      return (
+                        <button
+                          key={role.id}
+                          onClick={() => setSelectedRole(role.id)}
+                          className={`w-full p-4 rounded-xl border-2 transition-all duration-200 text-left ${
+                            selectedRole === role.id
+                              ? "border-blue-500 bg-blue-50 shadow-md transform scale-[1.02]"
+                              : "border-gray-200 hover:border-blue-300 hover:bg-gray-50"
+                          }`}
+                        >
+                          <div className="flex items-center">
+                            <div
+                              className={`p-3 rounded-lg ${role.color} text-white mr-4 shadow-sm`}
+                            >
+                              <Icon className="h-5 w-5" />
+                            </div>
+                            <div className="flex-1">
+                              <h3 className="font-semibold text-gray-800 text-lg">
+                                {role.title}
+                              </h3>
+                              <p className="text-gray-600 text-sm mt-1">
+                                {role.description}
+                              </p>
+                            </div>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {errors.role && (
+                    <p className="text-sm text-red-600 mt-1">{errors.role}</p>
+                  )}
+                </div>
+              )}
+
+              {/* Account Information Form */}
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Full Name
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.name}
+                      onChange={(e) =>
+                        setFormData({ ...formData, name: e.target.value })
+                      }
+                      className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
+                        errors.name
+                          ? "border-red-300 bg-red-50"
+                          : "border-gray-300"
+                      }`}
+                      placeholder="Enter your full name"
+                    />
+                    {errors.name && (
+                      <p className="text-sm text-red-600 mt-1">{errors.name}</p>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Username
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.username}
+                      onChange={(e) =>
+                        setFormData({ ...formData, username: e.target.value })
+                      }
+                      className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
+                        errors.username
+                          ? "border-red-300 bg-red-50"
+                          : "border-gray-300"
+                      }`}
+                      placeholder="Choose a username"
+                    />
+                    {errors.username && (
+                      <p className="text-sm text-red-600 mt-1">
+                        {errors.username}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <Mail className="inline w-4 h-4 mr-2" />
+                    Email Address
+                  </label>
+                  <input
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) =>
+                      setFormData({ ...formData, email: e.target.value })
+                    }
+                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
+                      errors.email
+                        ? "border-red-300 bg-red-50"
+                        : "border-gray-300"
+                    }`}
+                    placeholder="Enter your email"
+                  />
+                  {errors.email && (
+                    <p className="text-sm text-red-600 mt-1">{errors.email}</p>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Password
+                    </label>
+                    <div className="relative">
+                      <input
+                        type={showPassword ? "text" : "password"}
+                        value={formData.password}
+                        onChange={(e) =>
+                          setFormData({ ...formData, password: e.target.value })
+                        }
+                        className={`w-full px-4 py-3 pr-12 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
+                          errors.password
+                            ? "border-red-300 bg-red-50"
+                            : "border-gray-300"
                         }`}
+                        placeholder="Create a password (min. 6 characters)"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
                       >
-                        <div className="flex items-center">
-                          <div
-                            className={`p-3 rounded-lg ${role.color} text-white mr-4 shadow-sm`}
-                          >
-                            <Icon className="h-5 w-5" />
-                          </div>
-                          <div className="flex-1">
-                            <h3 className="font-semibold text-gray-800 text-lg">
-                              {role.title}
-                            </h3>
-                            <p className="text-gray-600 text-sm mt-1">
-                              {role.description}
-                            </p>
-                          </div>
-                        </div>
+                        {showPassword ? (
+                          <EyeOff className="h-5 w-5" />
+                        ) : (
+                          <Eye className="h-5 w-5" />
+                        )}
                       </button>
-                    );
-                  })}
-                </div>
-                {errors.role && (
-                  <p className="text-sm text-red-600 mt-1">{errors.role}</p>
-                )}
-              </div>
-
-              {/* Personal Information */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Full Name
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.name}
-                    onChange={(e) =>
-                      setFormData({ ...formData, name: e.target.value })
-                    }
-                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
-                      errors.name
-                        ? "border-red-300 bg-red-50"
-                        : "border-gray-300"
-                    }`}
-                    placeholder="Enter your full name"
-                  />
-                  {errors.name && (
-                    <p className="text-sm text-red-600 mt-1">{errors.name}</p>
-                  )}
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Username
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.username}
-                    onChange={(e) =>
-                      setFormData({ ...formData, username: e.target.value })
-                    }
-                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
-                      errors.username
-                        ? "border-red-300 bg-red-50"
-                        : "border-gray-300"
-                    }`}
-                    placeholder="Choose a username"
-                  />
-                  {errors.username && (
-                    <p className="text-sm text-red-600 mt-1">
-                      {errors.username}
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  <Mail className="inline w-4 h-4 mr-2" />
-                  Email Address
-                </label>
-                <input
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) =>
-                    setFormData({ ...formData, email: e.target.value })
-                  }
-                  className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
-                    errors.email
-                      ? "border-red-300 bg-red-50"
-                      : "border-gray-300"
-                  }`}
-                  placeholder="Enter your email"
-                />
-                {errors.email && (
-                  <p className="text-sm text-red-600 mt-1">{errors.email}</p>
-                )}
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Password
-                  </label>
-                  <div className="relative">
-                    <input
-                      type={showPassword ? "text" : "password"}
-                      value={formData.password}
-                      onChange={(e) =>
-                        setFormData({ ...formData, password: e.target.value })
-                      }
-                      className={`w-full px-4 py-3 pr-12 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
-                        errors.password
-                          ? "border-red-300 bg-red-50"
-                          : "border-gray-300"
-                      }`}
-                      placeholder="Create a password (min. 6 characters)"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
-                    >
-                      {showPassword ? (
-                        <EyeOff className="h-5 w-5" />
-                      ) : (
-                        <Eye className="h-5 w-5" />
-                      )}
-                    </button>
+                    </div>
+                    {errors.password && (
+                      <p className="text-sm text-red-600 mt-1">
+                        {errors.password}
+                      </p>
+                    )}
                   </div>
-                  {errors.password && (
-                    <p className="text-sm text-red-600 mt-1">
-                      {errors.password}
-                    </p>
-                  )}
-                </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Confirm Password
-                  </label>
-                  <div className="relative">
-                    <input
-                      type={showConfirmPassword ? "text" : "password"}
-                      value={formData.confirmPassword}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          confirmPassword: e.target.value,
-                        })
-                      }
-                      className={`w-full px-4 py-3 pr-12 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
-                        errors.confirmPassword
-                          ? "border-red-300 bg-red-50"
-                          : "border-gray-300"
-                      }`}
-                      placeholder="Confirm your password"
-                    />
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setShowConfirmPassword(!showConfirmPassword)
-                      }
-                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
-                    >
-                      {showConfirmPassword ? (
-                        <EyeOff className="h-5 w-5" />
-                      ) : (
-                        <Eye className="h-5 w-5" />
-                      )}
-                    </button>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Confirm Password
+                    </label>
+                    <div className="relative">
+                      <input
+                        type={showConfirmPassword ? "text" : "password"}
+                        value={formData.confirmPassword}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            confirmPassword: e.target.value,
+                          })
+                        }
+                        className={`w-full px-4 py-3 pr-12 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
+                          errors.confirmPassword
+                            ? "border-red-300 bg-red-50"
+                            : "border-gray-300"
+                        }`}
+                        placeholder="Confirm your password"
+                      />
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setShowConfirmPassword(!showConfirmPassword)
+                        }
+                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                      >
+                        {showConfirmPassword ? (
+                          <EyeOff className="h-5 w-5" />
+                        ) : (
+                          <Eye className="h-5 w-5" />
+                        )}
+                      </button>
+                    </div>
+                    {errors.confirmPassword && (
+                      <p className="text-sm text-red-600 mt-1">
+                        {errors.confirmPassword}
+                      </p>
+                    )}
                   </div>
-                  {errors.confirmPassword && (
-                    <p className="text-sm text-red-600 mt-1">
-                      {errors.confirmPassword}
-                    </p>
-                  )}
                 </div>
               </div>
             </div>
@@ -896,7 +899,7 @@ const SignUp = () => {
 
           {/* Navigation Buttons */}
           <div className="flex space-x-3 mt-8">
-            {step > 1 && (
+            {step > 1 ? (
               <button
                 type="button"
                 onClick={handleBack}
@@ -904,11 +907,19 @@ const SignUp = () => {
               >
                 Back
               </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => navigate("/")}
+                className="flex-1 py-3 px-4 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
             )}
             <button
               type="button"
               onClick={handleNext}
-              disabled={isLoading}
+              disabled={isLoading || (!selectedRole && step === 1)}
               className="flex-1 bg-gradient-to-r from-blue-600 to-green-600 text-white py-3 px-4 rounded-lg font-semibold hover:from-blue-700 hover:to-green-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading
