@@ -45,49 +45,75 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (credentials) => {
     setError(null);
-    const response = await authAPI.login(credentials);
 
-    if (response.success) {
-      const { user } = response.data;
-      setUser(user);
-      return { success: true, user };
-    } else {
-      throw new Error(response.message || "Login failed");
+    console.log("🔍 AuthContext - Login called with:", credentials);
+
+    try {
+      const response = await authAPI.login(credentials);
+
+      console.log("🔍 AuthContext - Login API response:", response);
+
+      if (response.success) {
+        const { user } = response.data;
+
+        console.log("✅ AuthContext - Login successful:", {
+          userId: user._id,
+          name: user.name,
+          role: user.role,
+          email: user.email,
+        });
+
+        setUser(user);
+        return { success: true, user };
+      } else {
+        console.log("❌ AuthContext - Login failed:", response.message);
+        throw new Error(response.message || "Login failed");
+      }
+    } catch (error) {
+      console.error("🔥 AuthContext - Login error caught:", {
+        message: error.message,
+        response: error.response?.data,
+      });
+      throw error;
     }
   };
 
   const signup = async (userData) => {
     setError(null);
 
-    // Transform frontend role to backend role
-    const roleMapping = {
-      mother: "mother",
-      "health-worker": "health_worker",
-      hospital: "hospital_staff",
-      admin: "admin",
-    };
+    console.log("🔍 AuthContext - Signup called with:", userData);
 
+    // Send data exactly as frontend provides (no transformation needed)
+    // The backend will handle role validation
     const backendData = {
       name: userData.name,
       username: userData.username,
       email: userData.email,
       password: userData.password,
-      role: roleMapping[userData.role] || "mother",
-      phone: userData.phone || "",
-      subCounty: userData.subCounty || "",
-      ward: userData.ward || "",
-      location: userData.location || "",
+      role: userData.role, // Send role exactly as selected
+      // Only include these fields if they exist (for mother role)
+      ...(userData.phone && { phone: userData.phone }),
+      ...(userData.subCounty && { subCounty: userData.subCounty }),
+      ...(userData.ward && { ward: userData.ward }),
+      ...(userData.location && { location: userData.location }),
       children: userData.children || [],
     };
 
-    const response = await authAPI.register(backendData);
+    console.log("🔍 AuthContext - Backend data:", backendData);
 
-    if (response.success) {
-      const { user } = response.data;
-      setUser(user);
-      return { success: true, user };
-    } else {
-      throw new Error(response.message || "Registration failed");
+    try {
+      const response = await authAPI.register(backendData);
+
+      if (response.success) {
+        const { user } = response.data;
+        setUser(user);
+        return { success: true, user };
+      } else {
+        throw new Error(response.message || "Registration failed");
+      }
+    } catch (error) {
+      console.error("🔥 AuthContext - Signup error:", error);
+      throw error;
     }
   };
 

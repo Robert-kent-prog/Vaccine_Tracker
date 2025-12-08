@@ -57,7 +57,7 @@ const SignUp = () => {
       showDetails: true,
     },
     {
-      id: "health-worker",
+      id: "health_worker",
       title: "Community Health Worker",
       icon: Stethoscope,
       description: "Manage vaccinations and follow-ups",
@@ -66,7 +66,7 @@ const SignUp = () => {
       showDetails: false,
     },
     {
-      id: "hospital",
+      id: "hospital_staff",
       title: "Hospital Staff",
       icon: Building,
       description: "Manage vaccine stock and coverage",
@@ -218,19 +218,32 @@ const SignUp = () => {
     try {
       // Prepare data for API
       const signupData = {
-        ...formData,
+        name: formData.name,
+        username: formData.username,
+        email: formData.email,
+        password: formData.password,
         role: selectedRole,
+        children: formData.children || [],
       };
+
+      // ONLY add location fields for mother role
+      if (selectedRole === "mother") {
+        signupData.phone = formData.phone;
+        signupData.subCounty = formData.subCounty;
+        signupData.ward = formData.ward;
+        signupData.location = formData.location;
+      }
+      // DO NOT add these fields for other roles at all
 
       // Call signup function from AuthContext
       const result = await signup(signupData);
 
       if (result.success) {
-        // Success - navigate to dashboard or login
-        navigate("/dashboard");
+        navigate("/hospital");
       }
     } catch (error) {
-      console.error("Signup error:", error);
+      console.error("Full signup error:", error);
+      console.error("Error response:", error.response?.data);
       setErrors({
         general: error.message || "Registration failed. Please try again.",
       });

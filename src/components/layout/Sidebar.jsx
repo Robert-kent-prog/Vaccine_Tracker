@@ -1,13 +1,13 @@
 // src/components/layout/Sidebar.jsx
-import React from 'react';
-import { useAuth } from '../../contexts/AuthContext';
-import { useApp } from '../../contexts/AppContext';
-import { 
-  X, 
-  Home, 
-  Users, 
-  Shield, 
-  BarChart3, 
+import React from "react";
+import { useAuth } from "../../contexts/AuthContext";
+import { useApp } from "../../contexts/AppContext";
+import {
+  X,
+  Home,
+  Users,
+  Shield,
+  BarChart3,
   Settings,
   FileText,
   Bell,
@@ -15,9 +15,9 @@ import {
   Package,
   Heart,
   Building,
-  Stethoscope
-} from 'lucide-react';
-import { useNavigate, useLocation } from 'react-router-dom';
+  Stethoscope,
+} from "lucide-react";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const Sidebar = () => {
   const { user } = useAuth();
@@ -28,40 +28,100 @@ const Sidebar = () => {
   const getNavigationItems = () => {
     const baseItems = {
       mother: [
-        { name: 'Dashboard', href: '/mother', icon: Home },
-        { name: 'My Children', href: '/mother/child/:childId', icon: Users },
-        { name: 'Vaccination Schedule', href: '/mother/vaccination-schedule', icon: Calendar },
-        { name: 'Reminders', href: '/mother/reminders', icon: Bell },
-        { name: 'Health Records', href: '/mother/health-records', icon: FileText },
-        { name: 'Profile ', href: '/mother/profile', icon: Users },
+        { name: "Dashboard", href: "/mother", icon: Home },
+        { name: "My Children", href: "/mother/child/:childId", icon: Users },
+        {
+          name: "Vaccination Schedule",
+          href: "/mother/vaccination-schedule",
+          icon: Calendar,
+        },
+        { name: "Reminders", href: "/mother/reminders", icon: Bell },
+        {
+          name: "Health Records",
+          href: "/mother/health-records",
+          icon: FileText,
+        },
+        { name: "Profile ", href: "/mother/profile", icon: Users },
       ],
-      'health-worker': [
-        { name: 'Dashboard', href: '/health-worker', icon: Home },
-        { name: 'Assigned Mothers', href: '/health-worker/assigned-mothers', icon: Users },
-        { name: 'Record Vaccination', href: '/health-worker/record-vaccination', icon: Shield },
-        { name: 'Defaulters List', href: '/health-worker/defaulters-list', icon: FileText },
-        { name: 'Field Reports', href: '/health-worker/field-reports', icon: BarChart3 },
-        { name: 'My Schedule', href: '/health-worker/schedule', icon: Calendar },
-        { name: 'Profile ', href: '/health-worker/profile', icon: Users },
+      health_worker: [
+        { name: "Dashboard", href: "/health-worker", icon: Home },
+        {
+          name: "Assigned Mothers",
+          href: "/health-worker/assigned-mothers",
+          icon: Users,
+        },
+        {
+          name: "Record Vaccination",
+          href: "/health-worker/record-vaccination",
+          icon: Shield,
+        },
+        {
+          name: "Defaulters List",
+          href: "/health-worker/defaulters-list",
+          icon: FileText,
+        },
+        {
+          name: "Field Reports",
+          href: "/health-worker/field-reports",
+          icon: BarChart3,
+        },
+        {
+          name: "My Schedule",
+          href: "/health-worker/schedule",
+          icon: Calendar,
+        },
+        { name: "Profile ", href: "/health-worker/profile", icon: Users },
       ],
-      hospital: [
-        { name: 'Dashboard', href: '/hospital', icon: Home },
-        { name: 'Patient Records', href: '/hospital/patients', icon: Users },
-        { name: 'Vaccine Stock', href: '/hospital/vaccine-stock', icon: Package },
-        { name: 'Appointments', href: '/hospital/appointments', icon: Calendar },
-        { name: 'Coverage Reports', href: '/hospital/coverage-reports', icon: BarChart3 },
-        { name: 'Facility Management', href: '/hospital/facility-management', icon: Settings },
-        { name: 'Profile', href: '/hospital/profile', icon: Users },
+      hospital_staff: [
+        { name: "Dashboard", href: "/hospital", icon: Home },
+        { name: "Patient Records", href: "/hospital/patients", icon: Users },
+        {
+          name: "Vaccine Stock",
+          href: "/hospital/vaccine-stock",
+          icon: Package,
+        },
+        {
+          name: "Appointments",
+          href: "/hospital/appointments",
+          icon: Calendar,
+        },
+        {
+          name: "Coverage Reports",
+          href: "/hospital/coverage-reports",
+          icon: BarChart3,
+        },
+        {
+          name: "Facility Management",
+          href: "/hospital/facility-management",
+          icon: Settings,
+        },
+        { name: "Profile", href: "/hospital/profile", icon: Users },
       ],
       admin: [
-        { name: 'Dashboard', href: '/admin', icon: Home },
-        { name: 'User Management', href: '/admin/user-management', icon: Users },
-        { name: 'Hospital Management', href: '/admin/hospital-management', icon: Building },
-        { name: 'CHW Management', href: '/admin/chw-management', icon: Stethoscope },
-        { name: 'System Analytics', href: '/admin/system-analytics', icon: BarChart3 },
-        { name: 'System Settings', href: '/admin/settings', icon: Settings },
-        { name: 'Profile', href: '/admin/profile', icon: Users },
-      ]
+        { name: "Dashboard", href: "/admin", icon: Home },
+        {
+          name: "User Management",
+          href: "/admin/user-management",
+          icon: Users,
+        },
+        {
+          name: "Hospital Management",
+          href: "/admin/hospital-management",
+          icon: Building,
+        },
+        {
+          name: "CHW Management",
+          href: "/admin/chw-management",
+          icon: Stethoscope,
+        },
+        {
+          name: "System Analytics",
+          href: "/admin/system-analytics",
+          icon: BarChart3,
+        },
+        { name: "System Settings", href: "/admin/settings", icon: Settings },
+        { name: "Profile", href: "/admin/profile", icon: Users },
+      ],
     };
 
     return baseItems[user?.role] || [];
@@ -70,9 +130,9 @@ const Sidebar = () => {
   const getRoleIcon = () => {
     const icons = {
       mother: Heart,
-      'health-worker': Stethoscope,
+      "health-worker": Stethoscope,
       hospital: Building,
-      admin: Shield
+      admin: Shield,
     };
     return icons[user?.role] || Users;
   };
@@ -81,7 +141,9 @@ const Sidebar = () => {
   const RoleIcon = getRoleIcon();
 
   const isActive = (href) => {
-    return location.pathname === href || location.pathname.startsWith(href + '/');
+    return (
+      location.pathname === href || location.pathname.startsWith(href + "/")
+    );
   };
 
   // Don't render sidebar if no user or no navigation items
@@ -93,16 +155,18 @@ const Sidebar = () => {
   const getSidebarHeight = () => {
     // Navbar height (h-16 = 4rem = 64px)
     let navbarHeight = 64;
-    
+
     // Check if user has stats bar (all roles except unknown)
-    const hasStatsBar = user?.role && ['mother', 'health-worker', 'hospital', 'admin'].includes(user.role);
-    
+    const hasStatsBar =
+      user?.role &&
+      ["mother", "health-worker", "hospital", "admin"].includes(user.role);
+
     // Stats bar height (approx 40px)
     const statsBarHeight = hasStatsBar ? 40 : 0;
-    
+
     // Total navbar height including stats
     const totalNavbarHeight = navbarHeight + statsBarHeight;
-    
+
     return `calc(100vh - ${totalNavbarHeight}px)`;
   };
 
@@ -110,7 +174,7 @@ const Sidebar = () => {
     <>
       {/* Mobile Overlay */}
       {sidebarOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-gray-600 bg-opacity-75 z-40 lg:hidden"
           onClick={() => setSidebarOpen(false)}
           aria-hidden="true"
@@ -118,16 +182,16 @@ const Sidebar = () => {
       )}
 
       {/* Sidebar Container */}
-      <div 
+      <div
         className={`
           fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-xl transform transition-transform duration-300 ease-in-out
           lg:fixed lg:left-0 lg:z-40 lg:flex lg:flex-col
-          ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+          ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
           lg:translate-x-0
         `}
-        style={{ 
+        style={{
           height: getSidebarHeight(),
-          top: 'auto', // Reset top positioning
+          top: "auto", // Reset top positioning
         }}
       >
         {/* Sidebar Content */}
@@ -154,7 +218,7 @@ const Sidebar = () => {
                 {navigationItems.map((item) => {
                   const Icon = item.icon;
                   const active = isActive(item.href);
-                  
+
                   return (
                     <li key={item.name}>
                       <button
@@ -167,15 +231,18 @@ const Sidebar = () => {
                         }}
                         className={`
                           w-full flex items-center px-3 py-3 text-sm font-medium rounded-lg transition-all duration-200
-                          ${active
-                            ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-600'
-                            : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900 border-l-4 border-transparent'
+                          ${
+                            active
+                              ? "bg-blue-50 text-blue-700 border-l-4 border-blue-600"
+                              : "text-gray-700 hover:bg-gray-50 hover:text-gray-900 border-l-4 border-transparent"
                           }
                         `}
                       >
-                        <Icon className={`h-5 w-5 mr-3 flex-shrink-0 ${
-                          active ? 'text-blue-500' : 'text-gray-400'
-                        }`} />
+                        <Icon
+                          className={`h-5 w-5 mr-3 flex-shrink-0 ${
+                            active ? "text-blue-500" : "text-gray-400"
+                          }`}
+                        />
                         <span className="text-left">{item.name}</span>
                       </button>
                     </li>
@@ -195,10 +262,10 @@ const Sidebar = () => {
               </div>
               <div className="ml-3 min-w-0 flex-1">
                 <p className="text-sm font-medium text-gray-900 truncate">
-                  {user?.name || 'User'}
+                  {user?.name || "User"}
                 </p>
                 <p className="text-xs text-gray-500 truncate capitalize">
-                  {user?.role?.replace('-', ' ') || 'Unknown Role'}
+                  {user?.role?.replace("-", " ") || "Unknown Role"}
                 </p>
               </div>
             </div>
