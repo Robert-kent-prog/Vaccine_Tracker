@@ -239,7 +239,34 @@ const SignUp = () => {
       const result = await signup(signupData);
 
       if (result.success) {
-        navigate("/hospital");
+        const user = result.user;
+        const backendRole = user.role;
+
+        // Convert backend role to frontend route using the same logic as AuthGuard
+        const getDashboardRoute = (role) => {
+          const normalized = role.toLowerCase().trim();
+
+          if (normalized === "hospital_staff" || normalized === "hospital") {
+            return "/hospital";
+          }
+          if (
+            normalized === "health_worker" ||
+            normalized === "health-worker"
+          ) {
+            return "/health-worker";
+          }
+          if (normalized === "mother" || normalized === "mothers") {
+            return "/mother";
+          }
+          if (normalized === "admin") {
+            return "/admin";
+          }
+        };
+
+        const route = getDashboardRoute(backendRole);
+
+        // Navigate to the dashboard
+        navigate(route);
       }
     } catch (error) {
       console.error("Full signup error:", error);

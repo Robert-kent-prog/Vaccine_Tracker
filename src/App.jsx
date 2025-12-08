@@ -35,7 +35,6 @@ import Appointments from "./pages/hospital/Appointments";
 import PatientRecords from "./pages/hospital/PatientRecords";
 import CHWManagement from "./pages/admin/CHWManagement";
 import HospitalManagement from "./pages/admin/HospitalManagement";
-import TestDashboard from "./components/dashboard/TestDashboard";
 import "./styles/globals.css";
 
 function App() {
@@ -49,7 +48,6 @@ function App() {
                 <Route path="/" element={<Login />} />
                 <Route path="/signup" element={<Signup />} />
 
-                <Route path="/test-dashboard" element={<TestDashboard />} />
                 {/* Mother Routes */}
                 <Route
                   path="/mother"

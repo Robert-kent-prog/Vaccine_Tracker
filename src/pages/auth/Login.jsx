@@ -102,8 +102,6 @@ const Login = () => {
           if (normalized === "admin") {
             return "/admin";
           }
-
-          return "/test-dashboard"; // fallback
         };
 
         const route = getDashboardRoute(backendRole);
